@@ -1,0 +1,142 @@
+#set( $dollar = '$' )
+#set( $hash = '#' )
+${hash} Production infrastructure. Development adds docker-compose.dev.yml.
+name: ${artifactId}
+services:
+  mysql:
+    extends:
+      file: mysql/compose.yaml
+      service: mysql
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4.2-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${dollar}{REDIS_PASSWORD:?Configure REDIS_PASSWORD}
+    command: ["sh", "-c", 'exec redis-server /usr/local/etc/redis/redis.conf --requirepass "${dollar}${dollar}REDIS_PASSWORD"']
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks: [middleware]
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="${dollar}${dollar}REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  nacos:
+    image: nacos/nacos-server:v2.4.3
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: "3306"
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: nacos
+      MYSQL_SERVICE_PASSWORD: ${dollar}{NACOS_DB_PASSWORD:?Configure NACOS_DB_PASSWORD}
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      NACOS_AUTH_ENABLE: "true"
+      NACOS_AUTH_TOKEN: ${dollar}{NACOS_AUTH_TOKEN:?Configure NACOS_AUTH_TOKEN}
+      NACOS_AUTH_IDENTITY_KEY: serverIdentity
+      NACOS_AUTH_IDENTITY_VALUE: ${dollar}{NACOS_AUTH_IDENTITY_VALUE:?Configure NACOS_AUTH_IDENTITY_VALUE}
+      JVM_XMS: 256m
+      JVM_XMX: 512m
+      JVM_XMN: 128m
+    volumes:
+      - nacos-logs:/home/nacos/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks: [database, middleware]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8848/nacos/v1/console/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.2
+    restart: unless-stopped
+    command: ["sh", "mqnamesrv"]
+    environment:
+      JAVA_OPT_EXT: -Xms256m -Xmx256m -Xmn128m
+    volumes:
+      - rocketmq-namesrv-logs:/home/rocketmq/logs
+    networks: [middleware]
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9876'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.2
+    restart: unless-stopped
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+      BROKER_ADVERTISE_HOST: rocketmq-broker
+      JAVA_OPT_EXT: -Xms512m -Xmx512m -Xmn256m
+    command:
+      - sh
+      - -c
+      - |
+        cp /etc/rocketmq/broker.conf /tmp/broker.conf
+        printf '\nbrokerIP1=%s\n' "${dollar}${dollar}BROKER_ADVERTISE_HOST" >> /tmp/broker.conf
+        exec sh mqbroker -n rocketmq-namesrv:9876 -c /tmp/broker.conf
+    volumes:
+      - ./rocketmq/broker.conf:/etc/rocketmq/broker.conf:ro
+      - rocketmq-store:/home/rocketmq/store
+      - rocketmq-broker-logs:/home/rocketmq/logs
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_healthy
+    networks: [middleware]
+    healthcheck:
+      test: ["CMD-SHELL", "sh mqadmin clusterList -n rocketmq-namesrv:9876 | grep -q broker-a"]
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  xxl-job-admin:
+    image: xuxueli/xxl-job-admin:2.4.1
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: "9090"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: xxl_job
+      SPRING_DATASOURCE_PASSWORD: ${dollar}{XXL_JOB_DB_PASSWORD:?Configure XXL_JOB_DB_PASSWORD}
+      XXL_JOB_ACCESS_TOKEN: ${dollar}{XXL_JOB_ACCESS_TOKEN:?Configure XXL_JOB_ACCESS_TOKEN}
+      JAVA_OPTS: -Xms256m -Xmx512m
+      TZ: Asia/Shanghai
+    volumes:
+      - xxl-job-logs:/data/applogs
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks: [database, middleware]
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9090'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+networks:
+  database:
+    internal: true
+  middleware: {}
+
+volumes:
+  mysql-data: {}
+  redis-data: {}
+  nacos-logs: {}
+  rocketmq-namesrv-logs: {}
+  rocketmq-broker-logs: {}
+  rocketmq-store: {}
+  xxl-job-logs: {}

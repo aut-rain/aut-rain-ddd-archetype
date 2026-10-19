@@ -1,0 +1,37 @@
+#set( $dollar = '$' )
+#set( $hash = '#' )
+${hash} dev/prod 共享的 MySQL 定义；通过上一级 Compose 入口使用。
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${databaseName}
+      MYSQL_USER: ${databaseName}
+      MYSQL_PASSWORD: ${dollar}{MYSQL_PASSWORD:?Configure MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${dollar}{MYSQL_ROOT_PASSWORD:?Configure MYSQL_ROOT_PASSWORD}
+      NACOS_DB_PASSWORD: ${dollar}{NACOS_DB_PASSWORD:?Configure NACOS_DB_PASSWORD}
+      XXL_JOB_DB_PASSWORD: ${dollar}{XXL_JOB_DB_PASSWORD:?Configure XXL_JOB_DB_PASSWORD}
+      XXL_JOB_ADMIN_PASSWORD: ${dollar}{XXL_JOB_ADMIN_PASSWORD:?Configure XXL_JOB_ADMIN_PASSWORD}
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./initdb/10-middleware.sh:/docker-entrypoint-initdb.d/10-middleware.sh:ro
+      - ../sql:/opt/middleware-sql:ro
+      - type: bind
+        source: ./conf.d/my.cnf
+        target: /etc/mysql/conf.d/application.cnf
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: [database]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"${dollar}${dollar}MYSQL_PASSWORD\" mysql --protocol=TCP -h 127.0.0.1 -u ${databaseName} -D ${databaseName} -Nse 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+    logging:
+      driver: local
+      options:
+        max-size: 20m
+        max-file: "5"

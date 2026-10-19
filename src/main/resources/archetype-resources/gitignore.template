@@ -1,0 +1,36 @@
+#set( $dollar = '$' )
+#set( $hash = '#' )
+${hash} Maven
+${hash} IDEA-created files at the project root; backend POMs remain tracked.
+/.mvn/
+/pom.xml
+**/target/
+**/out/
+**/build/
+**/surefire-reports/
+
+${hash} Node
+**/node_modules/
+**/dist/
+**/coverage/
+.pnpm-store/
+*.tsbuildinfo
+
+${hash} Runtime and local configuration
+.runtime/
+logs/
+.env
+.env.*
+!.env.example
+*.log
+*.pid
+
+${hash} IDE
+.idea/
+.vscode/
+*.iml
+
+${hash} Local data
+*.db
+*.sqlite*
+*.bak

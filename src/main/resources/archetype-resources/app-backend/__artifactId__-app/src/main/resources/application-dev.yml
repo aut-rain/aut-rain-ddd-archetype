@@ -1,0 +1,19 @@
+#set( $dollar = '$' )
+#set( $hash = '#' )
+server:
+  port: ${dollar}{SERVER_PORT:8080}
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${dollar}{APP_DB_URL:jdbc:mysql://127.0.0.1:3306/${databaseName}?characterEncoding=UTF-8&connectionTimeZone=UTC}
+    username: ${dollar}{APP_DB_USERNAME:${databaseName}}
+    password: ${dollar}{APP_DB_PASSWORD}
+  flyway:
+    enabled: true
+    clean-disabled: true
+    locations: classpath:db/migration
+logging:
+  level:
+    root: INFO

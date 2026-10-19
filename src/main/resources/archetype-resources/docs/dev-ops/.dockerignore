@@ -1,0 +1,13 @@
+#set( $dollar = '$' )
+#set( $hash = '#' )
+*
+!app.jar
+!web/
+!web/**
+!app/
+!app/Dockerfile
+!environment/
+!environment/nginx/
+!environment/nginx/Dockerfile
+!environment/nginx/conf.d/
+!environment/nginx/conf.d/default.conf

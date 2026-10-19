@@ -1,0 +1,7 @@
+#set( $dollar = '$' )
+#set( $hash = '#' )
+html, body, ${hash}root { min-height: 100%; margin: 0; }
+.app-shell { min-height: 100vh; background: ${hash}fff; color: ${hash}000; }
+.app-shell .ant-layout-header { background: ${hash}f6f8fa; border-bottom: 1px solid ${hash}d1d9e0; }
+.header-title { color: ${hash}000; font-size: 18px; }
+.app-content { padding: 32px; color: ${hash}000; }

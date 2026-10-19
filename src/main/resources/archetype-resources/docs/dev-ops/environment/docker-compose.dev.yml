@@ -1,0 +1,22 @@
+#set( $dollar = '$' )
+#set( $hash = '#' )
+${hash} Merge after docker-compose.yml. Only local development publishes middleware ports.
+name: ${artifactId}-dev
+services:
+  mysql:
+    ports: ["127.0.0.1:${dollar}{MYSQL_PORT:-3306}:3306"]
+  redis:
+    ports: ["127.0.0.1:6379:6379"]
+  nacos:
+    ports: ["127.0.0.1:8848:8848", "127.0.0.1:9848:9848"]
+  rocketmq-namesrv:
+    ports: ["127.0.0.1:9876:9876"]
+  rocketmq-broker:
+    environment:
+      BROKER_ADVERTISE_HOST: ${dollar}{BROKER_ADVERTISE_HOST:-127.0.0.1}
+    ports: ["127.0.0.1:10909:10909", "127.0.0.1:10911:10911", "127.0.0.1:10912:10912"]
+  xxl-job-admin:
+    ports: ["127.0.0.1:9090:9090"]
+networks:
+  database:
+    internal: false

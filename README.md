@@ -1,8 +1,5 @@
 # aut-rain-ddd-archetype
 
-作者：zzy  
-邮箱：2545946621@qq.com
-
 坐标：`com.autrain:aut-rain-ddd-archetype:1.0.0`。这是一个通用的 Java + React DDD 工程模板，当前是可生成、构建和打包的第一版工程骨架。
 
 ## 安装到本机 Maven 仓库
@@ -135,3 +132,13 @@ python scripts/verify.py
 - Maven/Spring/Compose/Bash/PowerShell 自身的美元符号用 `${dollar}`，井号用 `${hash}`，避免被 Velocity 提前解析。每个过滤模板文件头声明这两个变量。
 - 修改模板后重新安装并运行生成验证。脚手架升级不会自动修改以前生成的项目。
 - 当前仅落地本地文件，未初始化独立 Git 仓库或提交。
+
+## 贡献者
+
+- [zzy（项目负责人）](https://github.com/aut-rain)
+
+## 开源协议
+
+本项目采用 [MIT License](LICENSE)，版权所有 © 2026 zzy。
+
+MIT 协议声明用于脚手架本身。生成模板不附带项目级 LICENSE 文件，也不自动设置生成项目的 Maven/npm 协议声明；生成项目的协议由使用者自行决定。随附第三方文件的原有版权与许可声明保留。

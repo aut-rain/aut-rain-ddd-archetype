@@ -9,6 +9,13 @@
     <packaging>maven-archetype</packaging>
     <name>aut-rain DDD Java React archetype</name>
     <description>Generates a Java 21, React TypeScript and MySQL DDD project.</description>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
     <developers>
         <developer>
             <id>zzy</id>

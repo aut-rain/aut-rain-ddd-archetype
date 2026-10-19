@@ -15,6 +15,10 @@
     <dependencies>
         <dependency>
             <groupId>com.autrain</groupId>
+            <artifactId>${artifactId}-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.autrain</groupId>
             <artifactId>${artifactId}-domain</artifactId>
         </dependency>
         <dependency>

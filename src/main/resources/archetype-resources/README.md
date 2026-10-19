@@ -33,7 +33,7 @@ ${hash}${hash} 当前范围
 
 提供六模块 Java 骨架、React 起始页、Flyway 基线、统一响应/异常/校验基础类型、DDD 包结构、构建验证与分层部署工具。不包含具体业务、登录/RBAC 或数据库驱动页面运行目录；这些需要在本项目中继续开发，部署健康检查使用 `/api/v1/ping`。
 
-领域代码按业务边界放在 `domain/<业务领域>/` 下，使用 `model/aggregate`、`model/entity`、`model/valueobject`、`service`、`repository` 和 `adapter` 包。仓储和外部能力先在领域层定义端口，再由 `infrastructure` 实现；`trigger` 只负责入站适配和接口转换。
+后端包结构参考 XFG 标准 DDD 模板，见 [后端目录结构](app-backend/README.md)。领域代码按业务边界放在 `domain/<业务领域>/` 下，使用 `model/aggregate`、`model/entity`、`model/valobj`、`service`、`repository` 和 `adapter` 包；`xxx`、`yyy` 为待替换的示例领域。仓储和外部能力先在领域层定义端口，再由 `infrastructure/persistent`、`infrastructure/gateway` 实现；`trigger` 按 `http`、`rpc`、`listener`、`job` 区分入口。
 
 后端不用 Lombok；数据库不使用物理外键。迁移位于 `app-backend/${artifactId}-app/src/main/resources/db/migration`，已发布版本只能追加，不能修改。
 

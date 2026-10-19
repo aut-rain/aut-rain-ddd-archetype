@@ -43,7 +43,29 @@ def inspect(project, artifact, database, port):
         assert (project / 'app-backend' / (artifact + '-' + module) / 'pom.xml').is_file()
     assert (project / 'app-backend' / (artifact + '-types') / java_path / 'types/model/ApiResponse.java').is_file()
     assert (project / 'app-backend' / (artifact + '-types') / java_path / 'types/exception/BusinessException.java').is_file()
-    assert (project / 'app-backend' / (artifact + '-domain') / java_path / 'domain/model/aggregate/package-info.java').is_file()
+    expected_packages = {
+        'api': ('api', 'api/model'),
+        'app': ('config',),
+        'domain': tuple('domain/' + domain + '/' + part
+                        for domain in ('xxx', 'yyy')
+                        for part in ('model/aggregate', 'model/entity', 'model/valobj', 'service', 'repository', 'adapter')),
+        'infrastructure': ('infrastructure/persistent/dao', 'infrastructure/persistent/po',
+                           'infrastructure/persistent/repository', 'infrastructure/gateway/api',
+                           'infrastructure/gateway/dto', 'infrastructure/gateway/adapter', 'infrastructure/redis'),
+        'trigger': ('trigger/http', 'trigger/rpc', 'trigger/listener', 'trigger/job'),
+        'types': ('types/common',),
+    }
+    for module, packages in expected_packages.items():
+        for name in packages:
+            assert (project / 'app-backend' / (artifact + '-' + module) / java_path / name / 'package-info.java').is_file(), name
+    trigger_root = project / 'app-backend' / (artifact + '-trigger') / java_path
+    assert (trigger_root / 'trigger/http/HealthController.java').is_file()
+    assert (trigger_root / 'trigger/http/ApiExceptionHandler.java').is_file()
+    assert not (trigger_root / 'trigger/HealthController.java').exists()
+    test_root = project / 'app-backend' / (artifact + '-app') / 'src/test/java' / package.replace('.', '/')
+    assert (test_root / 'test/trigger/http/HealthControllerTest.java').is_file()
+    for name in ('test/infrastructure/persistent', 'test/infrastructure/redis'):
+        assert (test_root / name / 'package-info.java').is_file()
     ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
     for pom in (project / 'app-backend').rglob('pom.xml'):
         root = ET.parse(pom).getroot()
@@ -57,7 +79,6 @@ def inspect(project, artifact, database, port):
         declared = re.search(r'^package ([\w.]+);', content, re.M).group(1)
         assert declared == package or declared.startswith(package + '.'), source
         assert source.parent.as_posix().endswith('/' + declared.replace('.', '/')), source
-    assert len(list((project / 'app-backend').rglob('*.java'))) == 17
     resources = project / 'app-backend' / (artifact + '-app') / 'src/main/resources'
     for config in ('application.yml', 'application-dev.yml', 'application-test.yml', 'application-prod.yml', 'banner.txt', 'logback-spring.xml'):
         assert (resources / config).is_file(), config
@@ -146,6 +167,19 @@ def check_compose(ops):
 def check_architecture_boundaries(project, artifact):
     """Keep module dependencies aligned with the generated DDD package boundaries."""
     source_root = project / 'app-backend'
+    # Check Maven dependencies too: source-only checks miss an unused forbidden dependency.
+    allowed = {
+        'types': set(), 'api': {'types'}, 'domain': {'types'},
+        'infrastructure': {'domain'}, 'trigger': {'api', 'domain', 'types'},
+        'app': {'trigger', 'infrastructure'},
+    }
+    ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+    for module, expected in allowed.items():
+        pom = ET.parse(source_root / (artifact + '-' + module) / 'pom.xml')
+        dependencies = {item.findtext('m:artifactId', namespaces=ns)
+                        for item in pom.findall('m:dependencies/m:dependency', ns)}
+        internal = {name[len(artifact) + 1:] for name in dependencies if name.startswith(artifact + '-')}
+        assert internal == expected, (module, internal, expected)
     forbidden = {
         'types': ('api.', 'domain.', 'infrastructure.', 'trigger.'),
         'api': ('domain.', 'infrastructure.', 'trigger.'),

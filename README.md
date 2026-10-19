@@ -99,6 +99,8 @@ order-system/
 
 Maven 聚合入口保持在 `app-backend/pom.xml`。Archetype 生成过程中需要临时根 POM，post-generation hook 会删除由 Maven Archetype 生成的临时根 POM，并恢复 `.gitignore` 文件名；IDEA 自己预创建或重新写入的临时 POM 需要按上一节处理。
 
+`app-backend` 内部参考 XFG 标准 DDD 模板：领域按 `xxx/yyy` 业务包划分，值对象使用 `valobj`；基础设施分为 `persistent`、`gateway`、`redis`，入口分为 `http`、`rpc`、`listener`、`job`，并提供 `api/model`、`app/config`、`types/common` 和分层测试目录。详细结构见 [后端模板说明](src/main/resources/archetype-resources/app-backend/README.md)。包职责通过 `package-info.java` 记录，具体中间件客户端和业务功能按需实现。
+
 ## 已提供的能力
 
 - Java 21 / Spring Boot 3.5.11 六模块骨架，不使用 Lombok；提供 `/api/v1/ping` 和 Actuator 健康接口。

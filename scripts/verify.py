@@ -67,6 +67,17 @@ def inspect(project, artifact, database, port):
     for name in ('test/infrastructure/persistent', 'test/infrastructure/redis'):
         assert (test_root / name / 'package-info.java').is_file()
     ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+    reactor = ET.parse(project / 'app-backend/pom.xml').getroot()
+    managed = reactor.findall('m:dependencyManagement/m:dependencies/m:dependency', ns)
+    external = [d for d in managed if d.findtext('m:groupId', namespaces=ns) != 'com.autrain']
+    assert len(external) == 1
+    bom = external[0]
+    assert bom.findtext('m:groupId', namespaces=ns) == 'io.github.aut-rain'
+    assert bom.findtext('m:artifactId', namespaces=ns) == 'aut-rain-bom'
+    assert bom.findtext('m:version', namespaces=ns) == '${aut-rain-bom.version}'
+    assert bom.findtext('m:type', namespaces=ns) == 'pom'
+    assert bom.findtext('m:scope', namespaces=ns) == 'import'
+    assert reactor.findtext('m:properties/m:aut-rain-bom.version', namespaces=ns) == '1.1.0'
     for pom in (project / 'app-backend').rglob('pom.xml'):
         root = ET.parse(pom).getroot()
         group = root.find('m:groupId', ns) if pom.parent.name == 'app-backend' else root.find('m:parent/m:groupId', ns)

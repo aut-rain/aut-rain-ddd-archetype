@@ -94,3 +94,11 @@ ${hash}${hash} 依赖与构建
 在项目根目录执行 `mvn -f app-backend/pom.xml clean package`，生成的可执行 JAR 位于 `${artifactId}-app/target/${artifactId}-app.jar`。HTTP 测试通过 MockMvc 在内存中验证接口及异常响应，不启动监听端口、不连接数据库。
 
 Dockerfile 位于 app 模块，部署脚本继续从该模块读取 JAR 和 Dockerfile。数据库变更仍放在 app 的 `db/migration` 下，后端不使用 Lombok，数据库不使用物理外键。
+
+${hash}${hash} 第三方依赖版本
+
+聚合 POM 导入 `io.github.aut-rain:aut-rain-bom:1.1.0`，统一管理 Spring Boot、MyBatis、MySQL、Flyway 等第三方依赖。子模块按需声明依赖并省略版本；导入 BOM 不会自动引入 Lombok 或其他中间件。项目内部模块的版本管理仍由聚合 POM 维护。
+
+Java 21 编译设置和 Maven 插件由本项目维护。`spring-boot-maven-plugin.version` 为 3.5.11，升级 BOM 时核对插件与 Spring Boot 运行库版本；BOM 的属性不会通过 import 自动继承。版本覆盖应在项目 dependencyManagement 中显式声明并记录原因。
+
+BOM 1.1.0 新增 `com.xuxueli:xxl-job-core:3.3.0` 版本管理。当前工程尚未声明执行器依赖；需要时按模块职责添加并省略版本。Compose 中调度中心仍为 2.4.1，真正接入执行器前需验证版本兼容性，并配套升级镜像与初始化 SQL。

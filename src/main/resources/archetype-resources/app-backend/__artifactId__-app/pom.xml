@@ -51,7 +51,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.rain.${artifactId.replace('-', '_')}.Application</mainClass>
+                    <mainClass>${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.Application</mainClass>
                 </configuration>
                 <executions>
                     <execution>

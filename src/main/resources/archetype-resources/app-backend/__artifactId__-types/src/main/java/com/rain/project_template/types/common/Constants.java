@@ -5,7 +5,7 @@
  * author: zzy
  * created: 2026-11-02
  */
-package com.rain.${artifactId.replace('-', '_')}.types.common;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.common;
 
 /** 跨模块通用常量。 */
 public final class Constants {

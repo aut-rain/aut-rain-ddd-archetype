@@ -5,12 +5,12 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.test.trigger.http;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.test.trigger.http;
 
-import com.rain.${artifactId.replace('-', '_')}.trigger.http.ApiExceptionHandler;
-import com.rain.${artifactId.replace('-', '_')}.trigger.http.HealthController;
-import com.rain.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
-import com.rain.${artifactId.replace('-', '_')}.types.exception.BusinessException;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.trigger.http.ApiExceptionHandler;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.trigger.http.HealthController;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;

@@ -27,7 +27,7 @@ Version：    1.0.0
 
 如果 IDEA 使用 `C:\Users\<用户名>\.m2\repository`，模板也必须用该 Maven 配置安装；如果公司镜像要求 `settings.xml`，请在 IDEA 的 Maven User settings file 中选择一个真实存在的文件。不要在模板目录中提交个人 `settings.xml`。
 
-新项目的 `groupId` 默认是 `com.autrain`，可通过 `-DgroupId` 或 IDEA 向导设置为自己的 Maven 坐标；后端聚合 POM、模块父坐标和内部依赖统一使用该值。`package` 保持默认 `com.rain` 即可，Java 包名仍由模板内部按 `com.rain.<artifactId>` 计算，项目名中的连字符转为下划线，例如 `order-system` 对应 `com.rain.order_system`。Java 包名不随 `groupId` 或向导 `package` 参数改变；Java 保留字不能作为项目名。
+新项目的 `groupId` 默认是 `com.autrain`，可通过 `-DgroupId` 或 IDEA 向导设置为自己的 Maven 坐标；后端聚合 POM、模块父坐标和内部依赖统一使用该值。Java 根包默认按 `<groupId>.<artifactId>` 计算，例如 `groupId=io.example.orders`、`artifactId=order-system` 对应 `io.example.orders.order_system`；也可以通过 `-Dpackage=cn.im9sunnyboy` 或 IDEA 的 package 字段显式指定根包。groupId、项目名和显式包名中的连字符都转为下划线，各段必须是合法 Java 标识符且不能是 Java 保留字。`package` 默认 `auto`，表示按默认规则计算。
 
 IDEA 会把元数据中的默认值原样作为 `-D` 参数传递，因此 `package` 默认值不再包含动态表达式。模板也兼容旧向导缓存的表达式和裸 `-Dpackage`，不会将它们用于 Java 文件内容或源码目录。更新模板后建议重新打开创建向导；已生成的项目不会自动修改。
 
@@ -61,7 +61,7 @@ PowerShell 中完整引用每个 `-D` 参数，避免包含点号的坐标被拆
 | groupId | 生成项目的 Maven groupId，默认 com.autrain，支持自定义 |
 | artifactId | 项目目录、模块前缀、镜像及部署身份；2–40 位小写字母、数字、连字符，字母开头 |
 | version | 后端 Maven 版本，例如 0.1.0-SNAPSHOT |
-| package | 向导兼容参数，默认 com.rain；实际 Java 包名始终按 com.rain.<artifactId> 计算，连字符转为下划线 |
+| package | Java 根包；默认 auto，按 `<groupId>.<artifactId>` 计算；可显式指定，如 cn.im9sunnyboy，连字符转为下划线 |
 | projectName | 显示名称，默认 artifactId；第一版支持英文、数字、空格、下划线及连字符 |
 | databaseName | 默认 auto，按 artifactId 自动命名并将连字符转为下划线（order-system → order_system）；可显式指定 1–48 位小写字母、数字、下划线，字母开头；auto 为保留值 |
 | httpPort | 生产 HTTP 端口，默认 80，范围 1–65535；后端容器端口固定为 8080 |
@@ -133,7 +133,7 @@ python scripts/verify.py
 - 元数据：`src/main/resources/META-INF/maven/archetype-metadata.xml`。
 - 模板：`src/main/resources/archetype-resources/`。
 - 生成后处理：`src/main/resources/META-INF/archetype-post-generate.groovy`。
-- 模块目录使用 `__artifactId__`；Java 内容直接由 artifactId 计算包名。源码暂存在固定目录 `com/rain/project_template`，生成后处理将其改为 `com/rain/<规范化的 artifactId>`，不依赖 Maven 的 packageInPathFormat。
+- 模块目录使用 `__artifactId__`；Java 内容默认由 groupId 与 artifactId 计算包名。源码暂存在固定目录 `com/rain/project_template`，生成后处理将其移动到最终 Java 根包目录（默认 `<groupId 路径>/<规范化的 artifactId>`，显式 `package` 时按该值），并同步改写包声明，不依赖 Maven 的 packageInPathFormat。
 - Maven/Spring/Compose/Bash/PowerShell 自身的美元符号用 `${dollar}`，井号用 `${hash}`，避免被 Velocity 提前解析。每个过滤模板文件头声明这两个变量。
 - 修改模板后重新安装并运行生成验证。脚手架升级不会自动修改以前生成的项目。
 

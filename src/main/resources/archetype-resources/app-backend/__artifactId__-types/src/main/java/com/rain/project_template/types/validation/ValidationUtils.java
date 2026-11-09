@@ -5,9 +5,9 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.types.validation;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.validation;
 
-import com.rain.${artifactId.replace('-', '_')}.types.exception.BusinessException;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.exception.BusinessException;
 
 /** 领域及应用服务的参数守卫；不进行数据库查询或关联归属校验。 */
 public final class ValidationUtils {

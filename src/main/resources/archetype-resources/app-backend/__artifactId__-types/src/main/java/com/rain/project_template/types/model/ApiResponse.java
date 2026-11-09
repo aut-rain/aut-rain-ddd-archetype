@@ -5,9 +5,9 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.types.model;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.model;
 
-import com.rain.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
 
 /**
  * 对外接口的统一响应包装。业务数据通过 data 返回，错误由 code/message 表达。

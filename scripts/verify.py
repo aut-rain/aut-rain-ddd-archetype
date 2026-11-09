@@ -26,8 +26,8 @@ def tool(name):
     return value
 
 
-def inspect(project, artifact, database, port, group_id='com.autrain'):
-    package = 'com.rain.' + artifact.replace('-', '_')
+def inspect(project, artifact, database, port, group_id='com.autrain', root_package=None):
+    package = root_package or group_id.replace('-', '_') + '.' + artifact.replace('-', '_')
     java_path = 'src/main/java/' + package.replace('.', '/')
     expected = ['app-backend/pom.xml', '.gitignore', '.editorconfig', '.env.example', '.gitattributes',
                 'README.md', 'web/package.json', 'web/pnpm-lock.yaml', 'docs/dev-ops/environment/docker-compose.yml',
@@ -97,7 +97,7 @@ def inspect(project, artifact, database, port, group_id='com.autrain'):
     for profile in ('dev', 'test', 'prod'):
         assert 'port: ${SERVER_PORT:8080}' in (resources / ('application-' + profile + '.yml')).read_text(encoding='utf-8')
     assert '5137' in (project / 'web/vite.config.ts').read_text(encoding='utf-8')
-    check_architecture_boundaries(project, artifact)
+    check_architecture_boundaries(project, artifact, package)
     java = project / 'app-backend' / (artifact + '-app') / java_path / 'Application.java'
     assert 'package ' + package + ';' in java.read_text(encoding='utf-8')
     app_pom = project / 'app-backend' / (artifact + '-app') / 'pom.xml'
@@ -325,7 +325,7 @@ def check_compose(ops):
     print('Compose services, networks, ports, bind paths and build paths passed (no daemon).', flush=True)
 
 
-def check_architecture_boundaries(project, artifact):
+def check_architecture_boundaries(project, artifact, package):
     """Keep module dependencies aligned with the generated DDD package boundaries."""
     source_root = project / 'app-backend'
     # Check Maven dependencies too: source-only checks miss an unused forbidden dependency.
@@ -353,7 +353,6 @@ def check_architecture_boundaries(project, artifact):
         for file in java_root.rglob('*.java'):
             content = file.read_text(encoding='utf-8')
             for suffix in suffixes:
-                package = 'com.rain.' + artifact.replace('-', '_')
                 assert f'import {package}.{suffix}' not in content, f'{module} imports {suffix}: {file}'
 
 
@@ -379,25 +378,30 @@ def main():
              '-Dversion=0.1.0-SNAPSHOT',
              '-DoutputDirectory=' + str(output), '-DinteractiveMode=false']
     for artifact, database, port in [('sample-service', 'sample_data', 5137), ('another-service', 'another_data', 5138)]:
-        explicit = [] if artifact == 'sample-service' else ['-DgroupId=io.example.orders', '-Dpackage=com.rain.another_service']
+        explicit = [] if artifact == 'sample-service' else ['-DgroupId=io.example.orders']
         run(generate + ['-DartifactId=' + artifact,
              '-DdatabaseName=' + database, '-DhttpPort=' + str(port),
              *explicit], output)
         inspect(output / artifact, artifact, database, port,
                 'com.autrain' if artifact == 'sample-service' else 'io.example.orders')
     # Reproduce IDEA's literal default expressions and org.example wizard default.
-    for artifact, properties in [
-        ('idea-literal', ['-DgroupId=org.example', "-Dpackage=com.rain.${artifactId.replace('-', '_')}", '-DprojectName=${artifactId}']),
-        ('idea-default', ['-DgroupId=org.example', '-Dpackage=com.rain']),
-        ('bare-package', ['-Dpackage']),
-        ('project-template', []),
+    for artifact, properties, group_id, root_package in [
+        ('idea-literal', ['-DgroupId=org.example', "-Dpackage=com.rain.${artifactId.replace('-', '_')}", '-DprojectName=${artifactId}'], 'org.example', None),
+        ('idea-default', ['-DgroupId=org.example', '-Dpackage=com.rain'], 'org.example', None),
+        ('bare-package', ['-Dpackage'], 'com.autrain', None),
+        ('project-template', [], 'com.autrain', None),
+        ('group-hyphen', ['-DgroupId=io.example.my-company'], 'io.example.my-company', None),
+        ('explicit-package', ['-DgroupId=com.autrain', '-Dpackage=cn.im9sunnyboy'], 'com.autrain', 'cn.im9sunnyboy'),
     ]:
         run(generate + ['-DartifactId=' + artifact, *properties], output)
-        inspect(output / artifact, artifact, artifact.replace('-', '_'), 80,
-                'org.example' if artifact.startswith('idea-') else 'com.autrain')
+        inspect(output / artifact, artifact, artifact.replace('-', '_'), 80, group_id, root_package)
     for artifact, properties, message in [
         ('class', [], 'artifactId cannot be a Java reserved name'),
         ('bad_name', [], 'artifactId must contain 2-40'),
+        ('invalid-group', ['-DgroupId=com.1bad'], 'groupId must form a valid Java package'),
+        ('reserved-group', ['-DgroupId=com.class'], 'groupId segment cannot be a Java reserved name'),
+        ('invalid-package', ['-Dpackage=cn.1bad'], 'package must be a valid Java package'),
+        ('reserved-package', ['-Dpackage=cn.class'], 'package segment cannot be a Java reserved name'),
     ]:
         result = subprocess.run(generate + ['-DartifactId=' + artifact, *properties], cwd=output,
                                 capture_output=True, text=True, encoding='utf-8', errors='replace')

@@ -5,4 +5,4 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.test.infrastructure.persistent;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.test.infrastructure.persistent;

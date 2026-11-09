@@ -5,9 +5,9 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.types.exception;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.exception;
 
-import com.rain.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
 
 /**
  * 可预期的业务异常。不要把数据库、HTTP 客户端等基础设施异常直接暴露给接口层。

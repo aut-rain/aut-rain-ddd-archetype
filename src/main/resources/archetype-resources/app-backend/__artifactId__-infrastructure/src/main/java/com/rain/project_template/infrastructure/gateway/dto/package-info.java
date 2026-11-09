@@ -5,4 +5,4 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.infrastructure.gateway.dto;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.infrastructure.gateway.dto;

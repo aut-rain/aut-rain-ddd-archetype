@@ -2,7 +2,7 @@
 #set( $hash = '#' )
 ${hash} 后端目录结构
 
-后端以本目录的 `pom.xml` 为 Maven 聚合入口，按 DDD 分层组织六个模块。Maven groupId 为 `${groupId}`，Java 根包为 `com.rain.${artifactId.replace('-', '_')}`。
+后端以本目录的 `pom.xml` 为 Maven 聚合入口，按 DDD 分层组织六个模块。Maven groupId 为 `${groupId}`，Java 根包为 `${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}`。
 
 下图的 `<base>` 表示 Java 根包对应的目录，所有业务代码位于各模块的 `src/main/java/<base>/` 下。
 

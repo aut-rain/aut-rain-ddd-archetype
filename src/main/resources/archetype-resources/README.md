@@ -11,7 +11,7 @@ ${hash} ${projectName}
 
 本项目是生成后的应用工程。模板维护者应在 Archetype 源码目录执行 `mvn clean install`；不要在生成项目中执行 `create-from-project`。
 
-后端 Maven groupId 为 `${groupId}`，Java 根包为 `com.rain.${artifactId.replace('-', '_')}`，按 `com.rain.<artifactId>` 生成，项目名中的连字符转换为下划线。Maven 坐标与 Java 包名分别遵循这两套命名规则。
+后端 Maven groupId 为 `${groupId}`，Java 根包为 `${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}`，默认按 `<groupId>.<artifactId>` 生成，也可在创建项目时用 `package` 参数显式指定；groupId 与项目名中的连字符都转换为下划线，各段必须是合法 Java 标识符且不能是保留字。Maven 坐标与 Java 包名分别遵循这两套命名规则。
 
 ${hash}${hash} 构建验证（不启动服务）
 

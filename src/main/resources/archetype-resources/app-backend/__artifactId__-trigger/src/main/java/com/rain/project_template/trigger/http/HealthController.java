@@ -5,12 +5,12 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.trigger.http;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.trigger.http;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rain.${artifactId.replace('-', '_')}.types.model.ApiResponse;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.model.ApiResponse;
 
 /** 基础连通性检查；依赖就绪情况由 Actuator readiness 接口表达。 */
 @RestController

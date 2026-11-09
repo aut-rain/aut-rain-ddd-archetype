@@ -5,7 +5,7 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')};
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')};
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

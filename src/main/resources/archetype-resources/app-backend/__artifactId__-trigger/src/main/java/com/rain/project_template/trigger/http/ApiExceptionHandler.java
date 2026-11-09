@@ -5,11 +5,11 @@
  * author: zzy
  * created: 2026-10-19
  */
-package com.rain.${artifactId.replace('-', '_')}.trigger.http;
+package ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.trigger.http;
 
-import com.rain.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
-import com.rain.${artifactId.replace('-', '_')}.types.exception.BusinessException;
-import com.rain.${artifactId.replace('-', '_')}.types.model.ApiResponse;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.common.Constants.ResponseCode;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.exception.BusinessException;
+import ${groupId.replace('-', '_')}.${artifactId.replace('-', '_')}.types.model.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
